@@ -16,6 +16,7 @@ import {
     signInWithEmailAndPassword,
     sendPasswordResetEmail,
 } from 'firebase/auth'
+import { signInViaProvider } from 'src/authentication/background/sign-in-via-provider'
 import { getFunctions, httpsCallable } from 'firebase/functions'
 
 export type DevAuthState =
@@ -44,6 +45,7 @@ export function createAuthDependencies(options: {
                     getAuth,
                     getFunctions,
                     httpsCallable,
+                    signInViaProvider,
                     signInWithCustomToken,
                     sendPasswordResetEmail,
                     signInWithEmailAndPassword,
