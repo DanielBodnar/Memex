@@ -101,11 +101,12 @@ import { PageActivityIndicatorBackground } from 'src/page-activity-indicator/bac
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { handleIncomingData } from 'src/personal-cloud/background/handle-incoming-data'
 import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { remoteFunctions } from 'src/util/remote-functions-background'
 import { ImageSupportBackground } from 'src/image-support/background'
-import { ImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/types'
+import type { ImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/types'
+import type { ContentConversationsBackendInterface } from '@worldbrain/memex-common/lib/content-conversations/backend/types'
 
 export interface BackgroundModules {
     analyticsBG: AnalyticsCoreInterface
@@ -164,6 +165,7 @@ export function createBackgroundModules(options: {
     personalCloudBackend?: PersonalCloudBackend
     personalCloudMediaBackend?: PersonalCloudMediaBackend
     contentSharingBackend?: ContentSharingBackend
+    contentConversationsBackend?: ContentConversationsBackendInterface
     fetchPageData: (fullPageUrl: string) => Promise<PageDataResult>
     fetchPDFData: (fullPageUrl: string) => Promise<ExtractedPDFData>
     auth?: AuthBackground
@@ -693,6 +695,12 @@ export function createBackgroundModules(options: {
         contentConversations: new ContentConversationsBackground({
             serverStorage: options.serverStorage.modules,
             services: options.services,
+            backend:
+                options.contentConversationsBackend ??
+                firebaseService<ContentConversationsBackendInterface>(
+                    'contentConversations',
+                    callFirebaseFunction,
+                ),
         }),
         imageSupport: new ImageSupportBackground({
             backend: options.imageSupportBackend,

@@ -51,6 +51,7 @@ import { MockPushMessagingService } from './push-messaging'
 import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
 import type { ExtractedPDFData } from 'src/search'
 import { CloudflareImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/backend'
+import { ContentConversationsBackend } from '@worldbrain/memex-common/lib/content-conversations/backend'
 
 export const DEF_PAGE = {
     url: 'test.com',
@@ -295,6 +296,10 @@ export async function setupBackgroundIntegrationTest(
                     err.message,
                 )
             },
+        }),
+        contentConversationsBackend: new ContentConversationsBackend({
+            getCurrentUserId: getUserId,
+            storageModules: serverStorage.modules,
         }),
         generateServerId: () => nextServerId++,
         fetchPageData,

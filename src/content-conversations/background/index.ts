@@ -1,6 +1,7 @@
 import type { ContentConversationsInterface } from './types'
 import type { ServerStorageModules } from 'src/storage/types'
 import type { Services } from 'src/services/types'
+import type { ContentConversationsBackendInterface } from '@worldbrain/memex-common/lib/content-conversations/backend/types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 
 export default class ContentConversationsBackground {
@@ -8,14 +9,18 @@ export default class ContentConversationsBackground {
 
     constructor(
         private options: {
+            backend: ContentConversationsBackendInterface
             services: Pick<Services, 'contentConversations'>
             serverStorage: Pick<ServerStorageModules, 'contentConversations'>
         },
     ) {
         this.remoteFunctions = {
             submitReply: async (params) => {
-                const { contentConversations } = options.services
-                return contentConversations.submitReply(params)
+                const result = await this.options.backend.createReply(params)
+                if (result.status === 'permission-denied') {
+                    return { status: 'not-authenticated' }
+                }
+                return result
             },
             editReply: async (params) => {
                 const { contentConversations } = options.services
@@ -29,8 +34,7 @@ export default class ContentConversationsBackground {
                 sharedAnnotationReferences,
                 sharedListReference,
             }) => {
-                const { contentConversations } = this.options.serverStorage
-                return contentConversations.getThreadsForAnnotations({
+                return this.options.backend.getThreadsForAnnotations({
                     annotationReferences: sharedAnnotationReferences,
                     sharedListReference,
                 })
@@ -39,8 +43,7 @@ export default class ContentConversationsBackground {
                 sharedAnnotationReference,
                 sharedListReference,
             }) => {
-                const { contentConversations } = this.options.serverStorage
-                return contentConversations.getRepliesByAnnotation({
+                return this.options.backend.getRepliesByAnnotation({
                     annotationReference: sharedAnnotationReference,
                     sharedListReference,
                 })
@@ -49,8 +52,7 @@ export default class ContentConversationsBackground {
                 sharedAnnotationReference,
                 ...params
             }) => {
-                const { contentConversations } = this.options.serverStorage
-                return contentConversations.getOrCreateThread({
+                return this.options.backend.getOrCreateThread({
                     ...params,
                     annotationReference: sharedAnnotationReference,
                 })
